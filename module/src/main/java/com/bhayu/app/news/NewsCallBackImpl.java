@@ -1,8 +1,7 @@
-package com.bhayu.app.main;
+package com.bhayu.app.news;
 
 import android.content.Context;
 
-import com.bhayu.app.base.BasePresenter;
 import com.bhayu.app.helper.FTAes;
 import com.bhayu.app.helper.NetworkHelper;
 import com.bhayu.app.helper.SecretKeyHelper;
@@ -18,33 +17,35 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainPresenter implements BasePresenter {
+public class NewsCallBackImpl implements NewsUseCase{
     private Context context;
-    private MainView mView;
+    private NewsCallBack newsCallBack;
     private ApiInterface apiService;
 
-    public MainPresenter(MainView mView){
-        this.mView = mView;
+    public NewsCallBackImpl(NewsCallBack mView, Context context){
+        this.newsCallBack = mView;
+        this.context = context;
     }
 
     public void initService() {
         apiService = ApiClient.getClient(context).create(ApiInterface.class);
     }
 
-    public void getAll(){
+    @Override
+    public void executeGetNews(String keyword, String email, int page, int page_size, String type) {
         if (!NetworkHelper.isConnected(context)) {
-            mView.onNoInternetConnection();
+            newsCallBack.onNoInternetConnection();
             return;
         }
         initService();
         String jsonData="{\n" +
                 "\"device_id\": \"355033100414236\",\n" +
                 "\"community_id\": \""+ SecretKeyHelper.getCommunityId()+"\",\n" +
-                "\"type\": \"news\",\n" +
-                "\"email\": \"\",\n" +
-                "\"keyword\": \"\",\n" +
-                "\"page\": \"1\",\n" +
-                "\"page_size\": \"10\"\n" +
+                "\"type\": \""+type+"\",\n" +
+                "\"email\": \""+email+"\",\n" +
+                "\"keyword\": \""+keyword+"\",\n" +
+                "\"page\": \""+page+"\",\n" +
+                "\"page_size\": \""+page_size+"\"\n" +
                 "}";
 
         String data= (new FTAes()).encrypt(jsonData, SecretKeyHelper.encryptionKey());
@@ -58,52 +59,25 @@ public class MainPresenter implements BasePresenter {
                         try {
                             JSONObject item = new JSONObject(((new FTAes()).decrypt(response.body().getData().toString(), SecretKeyHelper.encryptionKey())));
                             Gson gson = new Gson();
-                          //  DataAll listitem = gson.fromJson(item.getString("data"), DataAll.class);
+                            //  DataAll listitem = gson.fromJson(item.getString("data"), DataAll.class);
                             List list = gson.fromJson(item.getString("list"), List.class);
-                            mView.showAll(list);
-//                            mView.info("sukses");
+                            newsCallBack.showNews(list);
+//                            newsCallBack.info("sukses");
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }else{
-                        mView.failureTask("Gagal koneksi ke services");
+                        newsCallBack.failureTask("Gagal koneksi ke services");
                     }
-                } else mView.failureTask("Gagal koneksi ke services");
+                } else newsCallBack.failureTask("Gagal koneksi ke services");
 
-                mView.finishedTask();
+                newsCallBack.finishedTask();
             }
 
             @Override
             public void onFailure(Call<Basev2> call, Throwable t) {
-                mView.failureTask(t.getMessage());
+                newsCallBack.failureTask(t.getMessage());
             }
         });
-    }
-
-    @Override
-    public Context getContext() {
-        return context;
-    }
-
-    @Override
-    public void onCreate(Context context) {
-        this.context = context;
-        mView.initView();
-        mView.initListener();
-    }
-
-    @Override
-    public void onPause() {
-
-    }
-
-    @Override
-    public void onResume() {
-
-    }
-
-    @Override
-    public void onDestroy() {
-
     }
 }

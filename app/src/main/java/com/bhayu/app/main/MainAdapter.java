@@ -6,15 +6,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import com.bhayu.app.R;
 import com.bhayu.app.base.BaseListAdapter;
 import com.bhayu.app.base.BaseViewHolder;
 import com.bhayu.app.model.News;
-import com.bhayu.module.R;
 import com.squareup.picasso.Picasso;
 
-public class MainAdapterAll extends BaseListAdapter<News, MainAdapterAll.MainAdapterAllHolder> {
-    public MainAdapterAll(Context context)
+public class MainAdapter extends BaseListAdapter<News, MainAdapter.MainAdapterAllHolder> {
+    public MainAdapter(Context context)
     {
         super(context);
     }

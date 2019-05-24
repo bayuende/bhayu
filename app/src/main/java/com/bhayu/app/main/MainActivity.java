@@ -6,22 +6,27 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 import com.bhayu.app.R;
-import com.bhayu.app.Test;
+import com.bhayu.app.base.BaseView;
 import com.bhayu.app.model.List;
+import com.bhayu.app.news.NewsCallBackImpl;
+import com.bhayu.app.news.NewsCallBack;
 
-public class MainActivity extends AppCompatActivity implements MainView {
-    private MainPresenter presenter;
+public class MainActivity extends AppCompatActivity implements NewsCallBack, BaseView {
+    private NewsCallBackImpl newsCallBackImpl;
     private RecyclerView rvAll;
-    private MainAdapterAll adapterAll;
+    private MainAdapter adapter;
+    private MainPresenter presenter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        adapterAll = new MainAdapterAll(this);
+        adapter = new MainAdapter(this);
         presenter = new MainPresenter(this);
         presenter.onCreate(this);
-        presenter.getAll();
+
+        newsCallBackImpl = new NewsCallBackImpl(this,this);
+        newsCallBackImpl.executeGetNews("","",1,10,"news");
     }
 
     @Override
@@ -30,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
         rvAll = findViewById(R.id.rvAll);
         rvAll.setHasFixedSize(true);
         rvAll.setLayoutManager(mLayoutManager);
-        rvAll.setAdapter(adapterAll);
+        rvAll.setAdapter(adapter);
     }
 
     @Override
@@ -64,9 +69,9 @@ public class MainActivity extends AppCompatActivity implements MainView {
     }
 
     @Override
-    public void showAll(List list) {
-        adapterAll.clear();
-        adapterAll.addAll(list.getNews());
-        adapterAll.notifyDataSetChanged();
+    public void showNews(List list) {
+        adapter.clear();
+        adapter.addAll(list.getNews());
+        adapter.notifyDataSetChanged();
     }
 }
